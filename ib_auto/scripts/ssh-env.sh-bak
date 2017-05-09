@@ -1,0 +1,52 @@
+#!/bin/bash
+
+read -p "Confirm the hostname of your machine(m1 or m2): " machine_name
+case $machine_name in
+"m1"|"m2")
+	read -p "Enter your system type(rhel centos suse): " system
+	read -p "Enter your system release(6.6 7.2 11.2): " release
+
+	case $system in 
+	"rhel"|"centos")
+		ser=`echo $release | grep 7.`
+		if [ "$ser" = "" ];then
+			sed -i 's/HOSTNAME/#HOSTNAME/g' /etc/sysconfig/network
+			echo HOSTNAME=m1 >> /etc/sysconfig/network
+		else
+			systemctl --static set-hostname m1
+		fi
+		;;
+	"suse")
+		sed -i 's/HOSTNAME/#HOSTNAME/g' /etc/sysconfig/network
+		echo HOSTNAME=m1 >> /etc/sysconfig/network
+		;;
+	*)
+		echo "OS not supported"
+		continue
+		;;
+	esac
+*)
+	echo "You entered the wrong name!"
+	continue
+esac
+touch /root/.mpd.conf
+chmod 600 /root/.mpd.conf
+echo "MPD_SECRETWORD=mr45-j9z" > /root/.mpd.conf
+touch /etc/mpd.conf
+chmod 600 /root/mpd.conf
+echo "MPD_SECRETWORD=111111" > /etc/mpd.conf
+
+echo -e "$1 m1\n$2 m2" >/etc/hosts
+echo -e "m1\nm2" > /root/.mpd.hosts
+
+mpirun_dir="/usr/mpi/gcc/openmpi-*/bin"
+echo "PATH=$mpirun_dir:$PATH" >> /root/.bashrc
+
+
+
+
+
+
+
+
+
